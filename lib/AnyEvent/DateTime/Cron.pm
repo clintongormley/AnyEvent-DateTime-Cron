@@ -76,9 +76,9 @@ sub start {
     $cv->begin( sub { $self->stop } );
 
     $self->{_signal} = AnyEvent->signal(
-        signal => 'HUP',
+        signal => 'TERM',
         cb     => sub {
-            print STDERR "Shutting down\n";
+            print STDERR "Shutting down\n" if $self->{_debug};
             $cv->end;
         }
     );
