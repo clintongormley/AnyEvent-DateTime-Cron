@@ -63,7 +63,18 @@ sub delete {
 #===================================
     my $self = shift;
     my @ids = ref $_[0] eq 'ARRAY' ? @{ $_[0] } : @_;
-    delete $self->{_jobs}{$_} for @ids;
+
+    for (@ids) {
+        print STDERR "Deleting job '$_'\n"
+            if $self->{_debug};
+
+        if ( my $job = delete $self->{_jobs}{$_} ) {
+            $job->{watchers} = {};
+        }
+        elsif ( $self->{_debug} ) {
+            print STDERR "Job '$_' not found\n";
+        }
+    }
     return $self;
 }
 
