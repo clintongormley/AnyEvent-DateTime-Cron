@@ -1,5 +1,16 @@
 Revision history for AnyEvent-DateTime-Cron
 
+0.02    2011-09-03
+
+        BREAKING CHANGES:
+         - changed the format of the add() command
+         - changed the exit signal to TERM
+
+        OTHER:
+         - added the single option for add()
+         - delete() wasn't stopping jobs correctly - thanks to
+           Andy Walker for sending a patch
+
 0.01    2011-07-19
         First version released
 

@@ -5,8 +5,7 @@ use strict;
 use DateTime();
 use DateTime::Event::Cron();
 use AnyEvent();
-
-our $VERSION = 0.01;
+our $VERSION = 0.02;
 
 #===================================
 sub new {
@@ -178,9 +177,7 @@ sub jobs { shift->{_jobs} }
 1;
 __END__
 
-=head1 NAME
-
-AnyEvent::DateTime::Cron - AnyEvent crontab with DateTime::Event::Cron
+# ABSTRACT: AnyEvent crontab with DateTime::Event::Cron
 
 =head1 SYNOPSIS
 
@@ -194,12 +191,8 @@ AnyEvent::DateTime::Cron - AnyEvent crontab with DateTime::Event::Cron
 
     $cron = AnyEvent::DateTime::Cron->new();
     $cron->debug(1)->add(
-        {
-            cron => '* * * * *',
-            cb   => sub {'foo'},
-            name => 'job_name_for_debugging'
-        },
-        {...}.
+        '* * * * *', name   => 'job_name', single => 1,  sub {'foo'},
+        ...
     );
 
     $cron->delete($job_id,$job_id...)
@@ -226,20 +219,19 @@ Creates a new L<AnyEvent::DateTime::Cron> instance - takes no parameters.
 =head2 add()
 
     $cron->add(
-        '* * * * *'     => sub {...},
-        {
-            cron => '* * * * *',
-            cb   => sub {...},
-            name => 'my_job'
-        }
+        '* * * * *',                                     sub {...},
+        '* * * * *', name   => 'job_name', single => 1,  sub {...},
+        ...
     );
 
-Use C<add()> to add new cron jobs.  It accepts a list of crontab entries and
-callbacks, or alternatively, a list of hashrefs with named parameters. The
-latter allows you to pass in an optional C<name> parameter, which can
-be useful for debugging.
+Use C<add()> to add new cron jobs.  It accepts a list of crontab entries,
+optional paremeters and callbacks.
 
-Each new job is assigned an ID.
+The C<name> parameter is useful for debugging, otherwise the auto-assigned
+C<ID> is used instead.
+
+The C<single> parameter, if C<true>, will only allow a single instance of
+a job to run at any one time.
 
 New jobs can be added before running, or while running.
 
@@ -266,7 +258,7 @@ The cron loop can be started by calling C<recv()> on the condvar.
     $cron->stop()
 
 Used to shutdown the cron loop gracefully. You can also shutdown the cron loop
-by sending a C<HUP> signal to the process.
+by sending a C<TERM> signal to the process.
 
 =head2 jobs()
 
@@ -308,39 +300,5 @@ until your job has completed:
 
 Callbacks are called inside an C<eval> so if they throw an error, they
 will warn, but won't cause the cron loop to exit.
-
-=head1 AUTHOR
-
-Clinton Gormley, C<< <drtech at cpan.org> >>
-
-=head1 BUGS
-
-If you have any suggestions for improvements, or find any bugs, please report
-them to L<http://github.com/clintongormley/AnyEvent-DateTime-Cron/issues>.
-I will be notified, and then you'll automatically be notified of progress on
-your bug as I make changes.
-
-=head1 SUPPORT
-
-You can find documentation for this module with the perldoc command.
-
-    perldoc AnyEvent::DateTime::Cron
-
-You can also look for information at
-L<http://github.com/clintongormley/AnyEvent-DateTime-Cron>
-
-
-=head1 LICENSE AND COPYRIGHT
-
-Copyright 2011 Clinton Gormley.
-
-This program is free software; you can redistribute it and/or modify it
-under the terms of either: the GNU General Public License as published
-by the Free Software Foundation; or the Artistic License.
-
-See http://dev.perl.org/licenses/ for more information.
-
-
-=cut
 
 1;
