@@ -113,8 +113,7 @@ sub _schedule {
     my $debug     = $self->{_debug};
 
     for my $job (@_) {
-        my $name = $job->{name};
-
+        my $name       = $job->{name};
         my $next_run   = $job->{event}->next($now);
         my $next_epoch = $next_run->epoch;
         my $delay      = $next_epoch - $now_epoch;
@@ -125,17 +124,25 @@ sub _schedule {
         my $run_event = sub {
             print STDERR "Starting job '$name'\n"
                 if $debug;
+
             $self->{_cv}->begin;
             delete $job->{watchers}{$next_epoch};
 
             $self->_schedule($job);
 
-            eval { $job->{cb}->( $self->{_cv}, $job ); 1 }
-                or warn $@ || 'Unknown error';
+            if ( $job->{single} && $job->{running}++ ) {
+                print STDERR "Skipping job '$name' - still running\n"
+                    if $debug;
+            }
+            else {
+                eval { $job->{cb}->( $self->{_cv}, $job ); 1 }
+                    or warn $@ || 'Unknown error';
+                delete $job->{running};
+                print STDERR "Finished job '$name'\n"
+                    if $debug;
+            }
 
             $self->{_cv}->end;
-            print STDERR "Finished job '$name'\n"
-                if $debug;
         };
 
         $job->{watchers}{$next_epoch} = AnyEvent->timer(
