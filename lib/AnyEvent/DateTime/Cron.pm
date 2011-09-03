@@ -27,25 +27,29 @@ sub add {
     my @args = ref $_[0] eq 'ARRAY' ? @{ shift() } : @_;
     while (@args) {
         my $cron = shift @args;
-        my ( $cb, $name );
-        if ( ref $cron eq 'HASH' ) {
-            ( $cron, $cb, $name ) = @{$cron}{qw(cron cb name)};
+        my ( $cb, %params );
+        while (@args) {
+            my $key = shift @args;
+            if ( ref $key eq 'CODE' ) {
+                $cb = $key;
+                last;
+            }
+            die "Unknown param '$key'"
+                unless $key =~ /^(name|single)$/;
+            $params{$key} = shift @args;
         }
-        else {
-            $cb = shift @args;
-        }
-
-        die "Illegal callback passed to add()"
-            unless ref $cb eq 'CODE';
+        die "No callback found for cron entry '$cron'"
+            unless $cb;
 
         my $event = DateTime::Event::Cron->new($cron);
         my $id    = ++$self->{_id};
-        my $job   = $self->{_jobs}{$id} = {
+        $params{name} ||= $id;
+        my $job = $self->{_jobs}{$id} = {
             event    => $event,
             cb       => $cb,
             id       => $id,
-            name     => $name || $id,
             watchers => {},
+            %params,
         };
 
         $self->_schedule($job)
