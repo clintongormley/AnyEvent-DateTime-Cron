@@ -6,3 +6,6 @@
 /.includepath
 /.project
 /MYMETA.yml
+log
+AnyEvent-*
+t.pl
