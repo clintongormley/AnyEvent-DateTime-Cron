@@ -1,5 +1,6 @@
 package AnyEvent::DateTime::Cron;
 
+
 use warnings;
 use strict;
 use DateTime();
@@ -34,7 +35,7 @@ sub add {
                 last;
             }
             die "Unknown param '$key'"
-                unless $key =~ /^(name|single)$/;
+                unless $key =~ /^(name|single|time_zone)$/;
             $params{$key} = shift @args;
         }
         die "No callback found for cron entry '$cron'"
@@ -124,7 +125,14 @@ sub _schedule {
 
     for my $job (@_) {
         my $name       = $job->{name};
+		my $time_zone  = $job->{time_zone};
+
+        $now->set_time_zone($time_zone) if $time_zone;
+
         my $next_run   = $job->{event}->next($now);
+
+        $next_run->set_time_zone($time_zone) if $time_zone;
+
         my $next_epoch = $next_run->epoch;
         my $delay      = $next_epoch - $now_epoch;
 
@@ -232,6 +240,8 @@ C<ID> is used instead.
 
 The C<single> parameter, if C<true>, will only allow a single instance of
 a job to run at any one time.
+
+The C<time_zone> parameter will set the time_zone for any DateTime objects used.
 
 New jobs can be added before running, or while running.
 
