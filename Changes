@@ -1,5 +1,10 @@
 Revision history for AnyEvent-DateTime-Cron
 
+0.03    2013-01-12
+        ENHANCEMENT:
+         - added support for timezones, thanks to AGORMAN for
+           the patch
+
 0.02    2011-09-03
 
         BREAKING CHANGES:
