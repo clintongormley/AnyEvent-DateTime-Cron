@@ -311,4 +311,4 @@ until your job has completed:
 Callbacks are called inside an C<eval> so if they throw an error, they
 will warn, but won't cause the cron loop to exit.
 
-1;
+=cut
